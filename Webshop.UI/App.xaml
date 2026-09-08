@@ -1,0 +1,25 @@
+<Application x:Class="Webshop.UI.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:Webshop.UI.ViewModel"
+             xmlns:v="clr-namespace:Webshop.UI.View"
+             ShutdownMode="OnMainWindowClose">
+
+    <Application.Resources>
+
+        <!-- Maps ViewModel types to View files globally -->
+
+        <DataTemplate DataType="{x:Type vm:CategoryViewModel}">
+            <v:CategoryView/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:ProductViewModel}">
+            <v:ProductView/>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type vm:CustomerViewModel}">
+            <v:CustomerView/>
+        </DataTemplate>
+
+    </Application.Resources>
+</Application>

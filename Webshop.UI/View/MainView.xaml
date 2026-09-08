@@ -1,0 +1,31 @@
+<Window x:Class="Webshop.UI.View.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Webshop Management" Height="650" Width="900">
+    <DockPanel LastChildFill="True">
+        <!-- Top Navigation Bar - MUST have DockPanel.Dock="Top" -->
+        <StackPanel DockPanel.Dock="Top" 
+                    Orientation="Horizontal"
+                    Background="#1F4E79" 
+                    Height="45">
+
+            <Button Content="Kategorier"
+                    Command="{Binding ShowCategoryViewCommand}"
+                    Foreground="White" Background="Transparent"
+                    BorderThickness="0" Padding="16,10" FontSize="14"/>
+
+            <Button Content="Produkter"
+                    Command="{Binding ShowProductViewCommand}"
+                    Foreground="White" Background="Transparent"
+                    BorderThickness="0" Padding="16,10" FontSize="14"/>
+
+            <Button Content="Kunder"
+                    Command="{Binding ShowCustomerViewCommand}"
+                    Foreground="White" Background="Transparent"
+                    BorderThickness="0" Padding="16,10" FontSize="14"/>
+        </StackPanel>
+
+        <!-- Dynamic View Content -->
+        <ContentControl Content="{Binding CurrentView}" Margin="8"/>
+    </DockPanel>
+</Window>
