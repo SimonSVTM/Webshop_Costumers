@@ -28,7 +28,7 @@ namespace Webshop.UI.ViewModel
         public MainViewModel(ICategoryRepository categoryRepo, IProductRepository productRepo, ICustomerRepository customerRepo)
         {
             CategoryVM = new CategoryViewModel(categoryRepo);
-            ProductVM = new ProductViewModel(productRepo);
+            ProductVM = new ProductViewModel(productRepo, categoryRepo);
             CustomerVM = new CustomerViewModel(customerRepo);
 
             // Set initial view

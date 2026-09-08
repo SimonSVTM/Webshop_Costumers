@@ -14,6 +14,7 @@ namespace Webshop.UI.ViewModel
     {
         private readonly IProductRepository _repository;
 
+
         public ObservableCollection<Product> Products { get; }
         public ObservableCollection<Product> ShoppingCart { get; }
 
@@ -62,22 +63,17 @@ namespace Webshop.UI.ViewModel
         public RelayCommand GetByCategoryCommand { get; }
         public RelayCommand ClearCommand { get; }
 
-        public ProductViewModel() : this(new ProductRepository())
+        public ProductViewModel() : this(new ProductRepository(), new CategoryRepository())
         {
         }
 
-        public ProductViewModel(IProductRepository repository)
+        public ProductViewModel(IProductRepository repository, ICategoryRepository crepository)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+   
             Products = new ObservableCollection<Product>();
             ShoppingCart = new ObservableCollection<Product>();
-            Categories = new ObservableCollection<Category>
-            {
-                new Category(1, "Electronics"),
-                new Category(2, "Clothing"),
-                new Category(3, "Books"),
-                new Category(4, "Home & Garden")
-            };
+            Categories = new ObservableCollection<Category>(crepository.GetAll());
 
             AddProductCommand = new RelayCommand(AddProduct, CanAddOrUpdate);
             AddToCartCommand = new RelayCommand(AddProductToShoppingCart, CanAddToCart);
