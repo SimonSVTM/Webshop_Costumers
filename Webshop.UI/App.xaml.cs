@@ -12,9 +12,9 @@ namespace Webshop.UI
             base.OnStartup(e);
 
             // 1. Initialize repositories
-            ICategoryRepository categoryRepo = new InMemoryCategoryRepository();
-            IProductRepository productRepo = new InMemoryProductRepository();
-            ICustomerRepository customerRepo = new InMemoryCustomerRepository();
+            ICategoryRepository categoryRepo = new CategoryRepository();
+            IProductRepository productRepo = new ProductRepository();
+            ICustomerRepository customerRepo = new CustomerRepository();
 
             // 2. Create MainViewModel and inject repositories (or pass instantiated sub-ViewModels)
             var mainViewModel = new MainViewModel(categoryRepo, productRepo, customerRepo);

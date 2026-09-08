@@ -20,7 +20,7 @@ namespace Webshop.UI.ViewModel
         public RelayCommand ShowCustomerViewCommand { get; }
 
         // Parameterless constructor for XAML design-time preview support
-        public MainViewModel() : this(new InMemoryCategoryRepository(), new InMemoryProductRepository(), new InMemoryCustomerRepository())
+        public MainViewModel() : this(new CategoryRepository(), new ProductRepository(), new CustomerRepository())
         {
         }
 

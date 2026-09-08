@@ -62,7 +62,7 @@ namespace Webshop.UI.ViewModel
         public RelayCommand GetByNameCommand { get; }
         public RelayCommand ClearCommand { get; }
 
-        public CustomerViewModel() : this(new InMemoryCustomerRepository()) { }
+        public CustomerViewModel() : this(new CustomerRepository()) { }
 
         public CustomerViewModel(ICustomerRepository repository)
         {

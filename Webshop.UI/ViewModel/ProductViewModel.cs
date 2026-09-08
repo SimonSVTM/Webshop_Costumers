@@ -62,7 +62,7 @@ namespace Webshop.UI.ViewModel
         public RelayCommand GetByCategoryCommand { get; }
         public RelayCommand ClearCommand { get; }
 
-        public ProductViewModel() : this(new InMemoryProductRepository())
+        public ProductViewModel() : this(new ProductRepository())
         {
         }
 
