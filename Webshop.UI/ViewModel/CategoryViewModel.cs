@@ -24,17 +24,17 @@ namespace Webshop.UI.ViewModel
                     // Fill the input fields with the selected category so it can be edited
                     if (_selectedCategory != null)
                     {
-                        Name = _selectedCategory.Name;
+                        CategoryName = _selectedCategory.CategoryName;
                     }
                 }
             }
         }
 
-        private string _name;
-        public string Name
+        private string _categoryName;
+        public string CategoryName
         {
-            get => _name;
-            set => SetField(ref _name, value);
+            get => _categoryName;
+            set => SetField(ref _categoryName, value);
         }
 
         public RelayCommand AddCommand { get; }
@@ -71,19 +71,19 @@ namespace Webshop.UI.ViewModel
 
         private bool CanAdd(object parameter)
         {
-            return !string.IsNullOrWhiteSpace(Name);
+            return !string.IsNullOrWhiteSpace(CategoryName);
         }
 
         private bool CanUpdate(object parameter)
         {
-            return SelectedCategory != null && !string.IsNullOrWhiteSpace(Name);
+            return SelectedCategory != null && !string.IsNullOrWhiteSpace(CategoryName);
         }
 
         private void AddCategory(object parameter)
         {
             try
             {
-                var newCategory = new Category(Name.Trim());
+                var newCategory = new Category(CategoryName.Trim());
                 _repository.Add(newCategory);
                 LoadCategories();
                 ClearInputFields(null);
@@ -99,7 +99,7 @@ namespace Webshop.UI.ViewModel
         {
             try
             {
-                SelectedCategory.Name = Name.Trim();
+                SelectedCategory.CategoryName = CategoryName.Trim();
                 _repository.Update(SelectedCategory);
                 LoadCategories();
                 ClearInputFields(null);
@@ -116,7 +116,7 @@ namespace Webshop.UI.ViewModel
             try
             {
                 var result = MessageBox.Show(
-                    $"Are you sure you want to delete '{SelectedCategory.Name}'?",
+                    $"Are you sure you want to delete '{SelectedCategory.CategoryName}'?",
                     "Confirm delete", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result != MessageBoxResult.Yes)
@@ -136,7 +136,7 @@ namespace Webshop.UI.ViewModel
         private void ClearInputFields(object parameter)
         {
             SelectedCategory = null;
-            Name = string.Empty;
+            CategoryName = string.Empty;
         }
     }
 }

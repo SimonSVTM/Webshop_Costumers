@@ -14,7 +14,6 @@ namespace Webshop.UI.ViewModel
     {
         private readonly IProductRepository _repository;
 
-
         public ObservableCollection<Product> Products { get; }
         public ObservableCollection<Product> ShoppingCart { get; }
 
@@ -48,8 +47,9 @@ namespace Webshop.UI.ViewModel
         private int _stockQuantity;
         public int StockQuantity { get => _stockQuantity; set => SetField(ref _stockQuantity, value); }
 
-        private string _searchName;
-        public string SearchName { get => _searchName; set => SetField(ref _searchName, value); }
+        // Søgetekst til LINQ-søgning
+        private string _searchText;
+        public string SearchText { get => _searchText; set => SetField(ref _searchText, value); }
 
         private Category _searchCategory;
         public Category SearchCategory { get => _searchCategory; set => SetField(ref _searchCategory, value); }
@@ -59,8 +59,9 @@ namespace Webshop.UI.ViewModel
         public RelayCommand UpdateProductCommand { get; }
         public RelayCommand DeleteProductCommand { get; }
         public RelayCommand GetAllCommand { get; }
-        public RelayCommand GetByNameCommand { get; }
-        public RelayCommand GetByCategoryCommand { get; }
+        public RelayCommand SearchCommand { get; }
+        public RelayCommand SortByPriceCommand { get; }
+        public RelayCommand ClearCategorySelectionCommand { get; }
         public RelayCommand ClearCommand { get; }
 
         public ProductViewModel() : this(new ProductRepository(), new CategoryRepository())
@@ -70,7 +71,7 @@ namespace Webshop.UI.ViewModel
         public ProductViewModel(IProductRepository repository, ICategoryRepository crepository)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
-   
+
             Products = new ObservableCollection<Product>();
             ShoppingCart = new ObservableCollection<Product>();
             Categories = new ObservableCollection<Category>(crepository.GetAll());
@@ -80,9 +81,12 @@ namespace Webshop.UI.ViewModel
             UpdateProductCommand = new RelayCommand(UpdateProduct, CanAddOrUpdate);
             DeleteProductCommand = new RelayCommand(DeleteProduct, CanDelete);
             GetAllCommand = new RelayCommand(_ => LoadProducts(_repository.GetAll()));
-            GetByNameCommand = new RelayCommand(_ => LoadProducts(_repository.GetByName(SearchName)));
-            GetByCategoryCommand = new RelayCommand(_ => LoadProducts(_repository.GetByCategory(SearchCategory)),
-                _ => SearchCategory != null);
+
+            // Søg-knap kommandoer
+            SearchCommand = new RelayCommand(_ => UpdateProducts());
+            SortByPriceCommand = new RelayCommand(_ => SortProductsByPrice());
+            ClearCategorySelectionCommand = new RelayCommand(_ => SearchCategory = null);
+
             ClearCommand = new RelayCommand(ClearInputFields);
 
             LoadProducts(_repository.GetAll());
@@ -93,6 +97,34 @@ namespace Webshop.UI.ViewModel
             Products.Clear();
             foreach (var product in products)
                 Products.Add(product);
+        }
+
+        /// <summary>
+        /// Filtrerer produkter ud fra SearchText og SearchCategory vha. LINQ
+        /// </summary>
+        private void UpdateProducts()
+        {
+            // Hent ud fra kategori først
+            var productsByCategory = _repository.GetByCategory(SearchCategory);
+
+            // Hvis der er søgetekst, hente ud fra søgning og tage snitfladen (intersect)
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                var productsBySearch = _repository.GetByName(SearchText);
+                // Bevarer kun de produkter, der findes i begge lister
+                productsByCategory = productsByCategory.Where(p => productsBySearch.Any(s => s.ProductID == p.ProductID)).ToList();
+            }
+
+            LoadProducts(productsByCategory);
+        }
+
+        /// <summary>
+        /// Sorterer den nuværende liste efter pris vha. LINQ OrderBy
+        /// </summary>
+        private void SortProductsByPrice()
+        {
+            var sortedList = Products.OrderBy(p => p.Price).ToList();
+            LoadProducts(sortedList);
         }
 
         private bool CanAddOrUpdate(object parameter)
@@ -133,7 +165,6 @@ namespace Webshop.UI.ViewModel
                 if (!CanAddToCart(null))
                     return;
 
-                // Add one unit to the cart and reduce available stock by one.
                 ShoppingCart.Add(SelectedProduct);
                 SelectedProduct.StockQuantity--;
                 _repository.UpdateProduct(SelectedProduct);
@@ -195,6 +226,8 @@ namespace Webshop.UI.ViewModel
             SelectedCategory = null;
             Price = 0;
             StockQuantity = 0;
+            SearchText = string.Empty;
+            SearchCategory = null;
         }
     }
 }

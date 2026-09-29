@@ -7,26 +7,26 @@ namespace Webshop.Model
     public class Category
     {
         public int CategoryId { get; set; }
-        public string Name { get; set; }
+        public string CategoryName { get; set; }
 
         public Category()
         {
         }
 
-        public Category(string name)
+        public Category(string categoryName)
         {
-            Name = name;
+            CategoryName = categoryName;
         }
 
-        public Category(int categoryId, string name)
+        public Category(int categoryId, string categoryName)
         {
             CategoryId = categoryId;
-            Name = name;
+            CategoryName = categoryName;
         }
 
         public override string ToString()
         {
-            return Name;
+            return CategoryName;
         }
     }
 }

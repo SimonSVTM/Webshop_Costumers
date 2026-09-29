@@ -15,14 +15,14 @@ namespace Webshop.Model
 
         public void Add(Category category)
         {
-            string sql = @"INSERT INTO dbo.Category (Name)
-                           VALUES (@Name);
+            string sql = @"INSERT INTO dbo.Category (CategoryName)
+                           VALUES (@CategoryName);
                            SELECT SCOPE_IDENTITY();";
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 SqlCommand command = new SqlCommand(sql, connection);
-                command.Parameters.AddWithValue("@Name", category.Name ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@CategoryName", category.CategoryName ?? (object)DBNull.Value);
 
                 connection.Open();
 
@@ -37,14 +37,14 @@ namespace Webshop.Model
         public void Update(Category category)
         {
             string sql = @"UPDATE dbo.Category
-                           SET Name = @Name
+                           SET CategoryName = @CategoryName
                            WHERE CategoryId = @CategoryId;";
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 SqlCommand command = new SqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@CategoryId", category.CategoryId);
-                command.Parameters.AddWithValue("@Name", category.Name ?? (object)DBNull.Value);
+                command.Parameters.AddWithValue("@CategoryName", category.CategoryName ?? (object)DBNull.Value);
 
                 connection.Open();
                 command.ExecuteNonQuery();
@@ -69,7 +69,7 @@ namespace Webshop.Model
         public List<Category> GetAll()
         {
             List<Category> categories = new List<Category>();
-            string sql = "SELECT CategoryId, Name FROM dbo.Category;";
+            string sql = "SELECT CategoryId, CategoryName FROM dbo.Category;";
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
@@ -89,7 +89,7 @@ namespace Webshop.Model
 
         public Category GetById(int categoryId)
         {
-            string sql = "SELECT CategoryId, Name FROM dbo.Category WHERE CategoryId = @CategoryId;";
+            string sql = "SELECT CategoryId, CategoryName FROM dbo.Category WHERE CategoryId = @CategoryId;";
 
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
@@ -113,7 +113,7 @@ namespace Webshop.Model
             return new Category
             {
                 CategoryId = Convert.ToInt32(reader["CategoryId"]),
-                Name = reader["Name"].ToString()
+                CategoryName = reader["CategoryName"].ToString()
             };
         }
     }

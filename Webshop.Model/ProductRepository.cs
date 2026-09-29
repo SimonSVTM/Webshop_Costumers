@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Data.SqlClient;
 
 namespace Webshop.Model
@@ -12,6 +13,70 @@ namespace Webshop.Model
         {
             _connectionString = @"Server=localhost;Database=SkoleDB;Trusted_Connection=True;TrustServerCertificate=True;";
         }
+
+        // Henter alle produkter fra databasen via ADO.NET (bevarer databaseforbindelsen)
+        public List<Product> GetAll()
+        {
+            List<Product> products = new List<Product>();
+            string sql = @"SELECT p.ProductID, p.ProductName, p.Price, p.StockQuantity,
+                                  c.CategoryId, c.CategoryName AS CategoryName
+                           FROM dbo.Product p
+                           INNER JOIN dbo.Category c ON p.CategoryId = c.CategoryId;";
+
+            using (SqlConnection connection = new SqlConnection(_connectionString))
+            {
+                SqlCommand command = new SqlCommand(sql, connection);
+                connection.Open();
+
+                using (SqlDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        products.Add(MapProduct(reader));
+                    }
+                }
+            }
+            return products;
+        }
+
+        // --- LINQ-OMSKREVNE METODER ---
+
+        // GetByID omskrevet til LINQ FirstOrDefault
+        public Product? GetByID(int productID)
+        {
+            return GetAll().FirstOrDefault(p => p.ProductID == productID);
+        }
+
+        // GetByName / Search omskrevet til LINQ Where + Contains
+        public List<Product> GetByName(string productName)
+        {
+            if (string.IsNullOrWhiteSpace(productName))
+                return GetAll();
+
+            return GetAll()
+                .Where(p => p.ProductName != null && p.ProductName.Contains(productName, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        // GetByCategory omskrevet til LINQ Where
+        public List<Product> GetByCategory(Category category)
+        {
+            if (category == null) return GetAll();
+
+            return GetAll()
+                .Where(p => p.Category != null && p.Category.CategoryId == category.CategoryId)
+                .ToList();
+        }
+
+        // Overload der tager int categoryId direkte
+        public List<Product> GetByCategory(int categoryId)
+        {
+            return GetAll()
+                .Where(p => p.Category != null && p.Category.CategoryId == categoryId)
+                .ToList();
+        }
+
+        // --- CRUD METODER ---
 
         public void AddProduct(Product product)
         {
@@ -75,121 +140,18 @@ namespace Webshop.Model
             }
         }
 
-        public List<Product> GetAll()
-        {
-            List<Product> products = new List<Product>();
-            string sql = @"SELECT p.ProductID, p.ProductName, p.Price, p.StockQuantity,
-                                  c.CategoryId, c.Name AS CategoryName
-                           FROM dbo.Product p
-                           INNER JOIN dbo.Category c ON p.CategoryId = c.CategoryId;";
-
-            using (SqlConnection connection = new SqlConnection(_connectionString))
-            {
-                SqlCommand command = new SqlCommand(sql, connection);
-                connection.Open();
-
-                using (SqlDataReader reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        products.Add(MapProduct(reader));
-                    }
-                }
-            }
-            return products;
-        }
-
-        public Product GetByID(int productID)
-        {
-            string sql = @"SELECT p.ProductID, p.ProductName, p.Price, p.StockQuantity,
-                                  c.CategoryId, c.Name AS CategoryName
-                           FROM dbo.Product p
-                           INNER JOIN dbo.Category c ON p.CategoryId = c.CategoryId
-                           WHERE p.ProductID = @ProductID;";
-
-            using (SqlConnection connection = new SqlConnection(_connectionString))
-            {
-                SqlCommand command = new SqlCommand(sql, connection);
-                command.Parameters.AddWithValue("@ProductID", productID);
-                connection.Open();
-
-                using (SqlDataReader reader = command.ExecuteReader())
-                {
-                    if (reader.Read())
-                    {
-                        return MapProduct(reader);
-                    }
-                }
-            }
-            return null;
-        }
-
-        public List<Product> GetByName(string productName)
-        {
-            List<Product> products = new List<Product>();
-            string sql = @"SELECT p.ProductID, p.ProductName, p.Price, p.StockQuantity,
-                                  c.CategoryId, c.Name AS CategoryName
-                           FROM dbo.Product p
-                           INNER JOIN dbo.Category c ON p.CategoryId = c.CategoryId
-                           WHERE p.ProductName LIKE @ProductName;";
-
-            using (SqlConnection connection = new SqlConnection(_connectionString))
-            {
-                SqlCommand command = new SqlCommand(sql, connection);
-                command.Parameters.AddWithValue("@ProductName", "%" + productName + "%");
-                connection.Open();
-
-                using (SqlDataReader reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        products.Add(MapProduct(reader));
-                    }
-                }
-            }
-            return products;
-        }
-
-        public List<Product> GetByCategory(Category category)
-        {
-            List<Product> products = new List<Product>();
-            if (category == null) return products;
-
-            string sql = @"SELECT p.ProductID, p.ProductName, p.Price, p.StockQuantity,
-                                  c.CategoryId, c.Name AS CategoryName
-                           FROM dbo.Product p
-                           INNER JOIN dbo.Category c ON p.CategoryId = c.CategoryId
-                           WHERE p.CategoryId = @CategoryId;";
-
-            using (SqlConnection connection = new SqlConnection(_connectionString))
-            {
-                SqlCommand command = new SqlCommand(sql, connection);
-                command.Parameters.AddWithValue("@CategoryId", category.CategoryId);
-                connection.Open();
-
-                using (SqlDataReader reader = command.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        products.Add(MapProduct(reader));
-                    }
-                }
-            }
-            return products;
-        }
-
         private Product MapProduct(SqlDataReader reader)
         {
             Category category = new Category
             {
                 CategoryId = Convert.ToInt32(reader["CategoryId"]),
-                Name = reader["CategoryName"].ToString()
+                CategoryName = reader["CategoryName"]?.ToString() ?? ""
             };
 
             return new Product
             {
                 ProductID = Convert.ToInt32(reader["ProductID"]),
-                ProductName = reader["ProductName"].ToString(),
+                ProductName = reader["ProductName"]?.ToString() ?? "",
                 Price = Convert.ToDecimal(reader["Price"]),
                 StockQuantity = Convert.ToInt32(reader["StockQuantity"]),
                 Category = category
